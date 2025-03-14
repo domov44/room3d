@@ -2,18 +2,23 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>My first three.js app</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>The room, by Ronan SCOTET</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 
 <body>
-    <script type="importmap">
+  <div class="loading-container">
+    <div class="loading-info">
+      <div class="loading-text">Chargement de la scène 3D</div>
+      <div class="loading-percentage" id="percentageText">0%</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress" id="progressBar"></div>
+    </div>
+  </div>
+
+  <script type="importmap">
         {
           "imports": {
             "three": "https://unpkg.com/three@0.138.0/build/three.module.js",
@@ -24,7 +29,7 @@
           }
         }
       </script>
-    <script type="module" src="/main.js"></script>
+  <script type="module" src="/main.js"></script>
 </body>
 
 </html>

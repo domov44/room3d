@@ -1,0 +1,52 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background-color: #e7e8dd;
+    color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+.loading-container {
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.loading-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.loading-text {
+    font-size: 16px;
+    color: #000000;
+}
+
+.loading-percentage {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    border: 1px solid orange;
+    border-radius: 50px;
+    overflow: hidden;
+    transition: 1s ease;
+}
+
+.progress {
+    height: 100%;
+    background: orange;
+    border-radius: 5px;
+    transition: 1s ease;
+    width: 0%;
+}

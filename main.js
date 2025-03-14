@@ -8,9 +8,25 @@ let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
 const sensitivity = 0.002;
 const lookAtPoint = new THREE.Vector3(0, 5, 0);
 
+let lightProgress = 0;
+let modelProgress = 0;
+let isLightLoaded = false;
+let isModelLoaded = false;
+
+// Déplacer la déclaration de rendererContainer en dehors de la fonction init()
+let rendererContainer;
+
+const progressBar = document.getElementById('progressBar');
+const percentageText = document.getElementById('percentageText');
+
 function init() {
+    // Déclaration de rendererContainer dans init()
+    rendererContainer = document.createElement('div');
+    rendererContainer.id = 'renderer-container';
+    rendererContainer.style.display = 'none';
+    document.body.appendChild(rendererContainer);
+
     scene = new THREE.Scene();
-    
     scene.background = new THREE.Color(0x2D2E32);
 
     camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 200);
@@ -25,23 +41,23 @@ function init() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.8;
     renderer.outputEncoding = THREE.sRGBEncoding;
-    document.body.appendChild(renderer.domElement);
+    rendererContainer.appendChild(renderer.domElement);
 
     new RGBELoader().load(
         'assets/light.hdr',
         function (texture) {
             texture.mapping = THREE.EquirectangularReflectionMapping;
             scene.environment = texture;
-
-            texture.encoding = THREE.sRGBEncoding; 
-
+            texture.encoding = THREE.sRGBEncoding;
+            isLightLoaded = true;
+            checkLoadingComplete();
         },
         function (xhr) {
-            console.log(`Chargement de EXR : ${(xhr.loaded / xhr.total * 100)}%`);
+            lightProgress = (xhr.loaded / xhr.total * 100);
+            updateTotalProgress();
         },
         function (error) {
-            console.error('Erreur de chargement de EXR', error);
-            alert("Le fichier EXR n'a pas pu être chargé.");
+            console.error('Erreur de chargement de la lumière', error);
         }
     );
 
@@ -56,9 +72,12 @@ function init() {
                 }
             });
             scene.add(gltf.scene);
+            isModelLoaded = true;
+            checkLoadingComplete();
         },
         function (xhr) {
-            console.log(`Chargement : ${(xhr.loaded / xhr.total * 100)}%`);
+            modelProgress = (xhr.loaded / xhr.total * 100);
+            updateTotalProgress();
         },
         function (error) {
             console.error('Erreur de chargement du modèle', error);
@@ -74,8 +93,22 @@ function init() {
 
     window.addEventListener('resize', onWindowResize);
     document.addEventListener('mousemove', onMouseMove);
+}
 
-    animate();
+function updateTotalProgress() {
+    const totalProgress = (lightProgress + modelProgress) / 2;
+    progressBar.style.width = `${totalProgress}%`;
+    percentageText.textContent = `${Math.round(totalProgress)}%`;
+}
+
+function checkLoadingComplete() {
+    if (isLightLoaded && isModelLoaded) {
+        progressBar.style.width = '100%';
+        percentageText.textContent = '100%';
+        animate();
+        document.querySelector('.loading-container').style.display = 'none';
+        rendererContainer.style.display = 'block';
+    }
 }
 
 function onMouseMove(event) {
