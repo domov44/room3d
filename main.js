@@ -47,7 +47,7 @@ function init() {
 
     const loader = new GLTFLoader();
     loader.load(
-        '/assets/memphis.glb',
+        '/assets/room.glb',
         function (gltf) {
             gltf.scene.traverse((child) => {
                 if (child.isMesh) {
