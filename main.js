@@ -13,14 +13,11 @@ let modelProgress = 0;
 let isLightLoaded = false;
 let isModelLoaded = false;
 
-// Déplacer la déclaration de rendererContainer en dehors de la fonction init()
 let rendererContainer;
 
 const progressBar = document.getElementById('progressBar');
-const percentageText = document.getElementById('percentageText');
 
 function init() {
-    // Déclaration de rendererContainer dans init()
     rendererContainer = document.createElement('div');
     rendererContainer.id = 'renderer-container';
     rendererContainer.style.display = 'none';
@@ -98,13 +95,11 @@ function init() {
 function updateTotalProgress() {
     const totalProgress = (lightProgress + modelProgress) / 2;
     progressBar.style.width = `${totalProgress}%`;
-    percentageText.textContent = `${Math.round(totalProgress)}%`;
 }
 
 function checkLoadingComplete() {
     if (isLightLoaded && isModelLoaded) {
         progressBar.style.width = '100%';
-        percentageText.textContent = '100%';
         animate();
         document.querySelector('.loading-container').style.display = 'none';
         rendererContainer.style.display = 'block';
