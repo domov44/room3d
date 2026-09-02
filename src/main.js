@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 let scene, camera, renderer, controls;
 let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
@@ -10,8 +10,10 @@ const lookAtPoint = new THREE.Vector3(0, 5, 0);
 
 let lightProgress = 0;
 let modelProgress = 0;
+let qnapProgress = 0;
 let isLightLoaded = false;
 let isModelLoaded = false;
+let isQnapLoaded = false;
 
 let rendererContainer;
 
@@ -25,6 +27,22 @@ function init() {
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x2D2E32);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    sunLight.position.set(40, 80, 30);
+    sunLight.target.position.set(0, 0, 0);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 1;
+    sunLight.shadow.camera.far = 250;
+    sunLight.shadow.camera.left = -80;
+    sunLight.shadow.camera.right = 80;
+    sunLight.shadow.camera.top = 80;
+    sunLight.shadow.camera.bottom = -80;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+    scene.add(sunLight.target);
 
     camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 200);
     camera.position.set(0, 0, 22);
@@ -81,6 +99,43 @@ function init() {
         }
     );
 
+    loader.load(
+        '/assets/qnap.glb',
+        function (gltf) {
+            const box = new THREE.Box3().setFromObject(gltf.scene);
+            const size = box.getSize(new THREE.Vector3());
+            const targetHeight = 1.5;
+            const scale = targetHeight / size.y;
+            gltf.scene.scale.setScalar(scale);
+
+            const boxScaled = new THREE.Box3().setFromObject(gltf.scene);
+            const centerScaled = boxScaled.getCenter(new THREE.Vector3());
+            const offsetX = -14;
+            const offsetZ = -5;
+            gltf.scene.position.set(
+                -centerScaled.x + offsetX,
+                -boxScaled.min.y,
+                -centerScaled.z + offsetZ
+            );
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+            scene.add(gltf.scene);
+            isQnapLoaded = true;
+            checkLoadingComplete();
+        },
+        function (xhr) {
+            qnapProgress = (xhr.loaded / xhr.total * 100);
+            updateTotalProgress();
+        },
+        function (error) {
+            console.error('Erreur de chargement du QNAP', error);
+        }
+    );
+
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableRotate = true;
     controls.enableDamping = true;
@@ -93,12 +148,12 @@ function init() {
 }
 
 function updateTotalProgress() {
-    const totalProgress = (lightProgress + modelProgress) / 2;
+    const totalProgress = (lightProgress + modelProgress + qnapProgress) / 3;
     progressBar.style.width = `${totalProgress}%`;
 }
 
 function checkLoadingComplete() {
-    if (isLightLoaded && isModelLoaded) {
+    if (isLightLoaded && isModelLoaded && isQnapLoaded) {
         progressBar.style.width = '100%';
         animate();
         document.querySelector('.loading-container').style.display = 'none';
